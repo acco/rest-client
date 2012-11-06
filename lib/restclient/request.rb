@@ -28,7 +28,7 @@ module RestClient
     attr_reader :method, :url, :headers, :cookies,
                 :payload, :user, :password, :timeout, :max_redirects,
                 :open_timeout, :raw_response, :verify_ssl, :ssl_client_cert,
-                :ssl_client_key, :ssl_ca_file, :processed_headers, :args
+                :ssl_client_key, :ssl_ca_file, :processed_headers, :backend, :args
 
     def self.execute(args, & block)
       new(args).execute(& block)
@@ -57,6 +57,7 @@ module RestClient
       @tf = nil # If you are a raw request, this is your tempfile
       @max_redirects = args[:max_redirects] || 10
       @processed_headers = make_headers headers
+      @backend = args[:backend] || nil
       @args = args
     end
 
@@ -99,6 +100,8 @@ module RestClient
       if RestClient.proxy
         proxy_uri = URI.parse(RestClient.proxy)
         Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, proxy_uri.user, proxy_uri.password)
+      elsif self.backend
+        self.backend
       else
         Net::HTTP
       end
